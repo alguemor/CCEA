@@ -6,7 +6,9 @@
 #include <limits>
 #include <algorithm>
 #include <random>
-#include <tuple>
+#include <tuple> // manejo de tuplas
+#include <cmath> // funcion sqrt
+#include <utility>
 using namespace std;
 
 void imprimirVector1D(const vector<int>& vector){
@@ -79,7 +81,46 @@ void imprimirVector2Ddouble(const vector<vector<double>>& vector){
     cout << "]" << endl;
 }
 
+vector<vector<pair<int, int>>> obtenerCoordenadasPorCluster(
+	const vector<int>& asignacion,
+	const vector<vector<int>>& datos,
+	int numClusters
+){
+	vector<vector<pair<int, int>>> coordenadasPorCluster(numClusters);
+	for(int i = 0; i < asignacion.size(); i++){
+		int cluster = asignacion[i];
+		if(cluster >= 0 && cluster , numClusters){
+			int x = datos[i][0];
+			int y = datos[i][1];
+			coordenadasPorCluster[cluster].push_back(make_pair(x, y));
+		}
+	}
+	return coordenadasPorCluster;
+}
+
+vector<double> obtenerValoresClusters(const vector<vector<pair<int, int>>>& coordenadasPorCluster, int numClusters){
+	vector<double> valoresClusters(numClusters, 0.0);
+	for(int c = 0; c < numClusters; c++){
+		double sumaDistancias = 0.0;
+		for(int i = 0; i < coordenadasPorCluster[c].size() - 1; i++){
+			for(int j = i + 1; j < coordenadasPorCluster[c].size(); j++){
+				int x1 = coordenadasPorCluster[c][i].first;
+				int y1 = coordenadasPorCluster[c][i].second;
+				int x2 = coordenadasPorCluster[c][j].first;
+				int y2 = coordenadasPorCluster[c][j].second;
+				int dx = x2 - x1;
+				int dy = y2 - y1;
+				double distancia = sqrt(dx*dx + dy*dy);
+				sumaDistancias += distancia;
+			}
+		}
+		valoresClusters[c] = sumaDistancias / coordenadasPorCluster[c].size();
+	}
+	return valoresClusters;
+}
+
 int main(int argc, char* argv[]){
+// class problem begin
     string nombreDataset = argv[1];
     string nombreClusters = argv[2];
     ifstream archivoData(nombreDataset);
@@ -90,48 +131,40 @@ int main(int argc, char* argv[]){
     int numClusters;
     archivoClusters >> numClusters;
     vector<int> limClusters;
-    string linea;
-    int lineasClusters = 0;
-    while(getline(archivoClusters, linea)){
-        lineasClusters++;
-        if(lineasClusters != 1){
-            int lim = stoi(linea);
-            limClusters.push_back(lim);
-        }else{
-            continue;
-        }
+    for(int i = 0; i < numClusters; i++){
+        int lim;
+        archivoClusters >> lim;
+        limClusters.push_back(lim);
     }
-    imprimirVector1D(limClusters);
+    //imprimirVector1D(limClusters);
     archivoClusters.close();
     
     // vector del dataset inicial
     // obtener los valores de las columnas y filas
-    string valoresDataset;
-    getline(archivoData, valoresDataset);
-    stringstream ss(valoresDataset);
-    vector<int> filascolumnas;
-    int temporal;
-    while(ss >> temporal){
-        filascolumnas.push_back(temporal);
-    }
-    int filas = filascolumnas[0];
-    int columnas = filascolumnas[1];
-
-    // generar vector[f][c]
+    int filas;
+    int columnas;
+    archivoData >> filas;
+    archivoData >> columnas;
     vector<vector<int>> datos(filas, vector<int>(columnas,0));
-    int contador = 0;
-    while(getline(archivoData, linea)){
-        if(contador < filas){
-            istringstream ss(linea);
-            for(int i = 0; i < columnas && !ss.eof(); i++){
-                ss >> datos[contador][i];
-            }
+    for(int i = 0; i < filas; i++){
+        for(int j = 0; j < columnas; j++){
+            archivoData >> datos[i][j];
         }
-        contador++;
     }
-    imprimirVector2D(datos);
+    //imprimirVector2D(datos);
     archivoData.close();
 
+    vector<vector<int>> datos(filas, vector<int>(columnas,0));
+    for(int i = 0; i < filas; i++){
+        for(int j = 0; j < columnas; j++){
+            archivoData >> datos[i][j];
+        }
+    }
+    //imprimirVector2D(datos);
+    archivoData.close();
+    
+// class problem end
+// class solution begin
 
     // generar dos puntos de manera aleatoria (coordenadas x, y) para cada cluster (4)
     // obtener los valores minimo y maximo para los clusters (normalizacion)
@@ -155,6 +188,13 @@ int main(int argc, char* argv[]){
         centrosClusters.push_back(centro);
     }
     imprimirVector1DPair(centrosClusters);
+    
+    // vector<pair<int, int>> centrosClusters = {
+    //     {20, 140},
+    //     {100, 140},
+    //     {20, 20},
+    //     {100, 20}
+    // };
 
     // matriz de distancias entre punto y centroides clusters
     vector<vector<double>> distancias(filas, vector<double>(numClusters,0));
@@ -162,11 +202,16 @@ int main(int argc, char* argv[]){
         for(int j = 0; j < numClusters; j++){
             int dx = datos[i][0] - centrosClusters[j].first;
             int dy = datos[i][1] - centrosClusters[j].second;
-            distancias[i][j] = dx*dx + dy*dy;
+            distancias[i][j] = sqrt(dx*dx + dy*dy);
         }
     }
-    imprimirVector2Ddouble(distancias);
+    //imprimirVector2Ddouble(distancias);
+	
 
+    // asignacion
+    vector<int> asignacion(filas, 0);
+
+    // metodo 1 : greedy begin
     // ordenamiento distancias
     vector<tuple<int, int, double>> todas_distancias;
     for(int i = 0; i < filas; i++){
@@ -178,23 +223,37 @@ int main(int argc, char* argv[]){
         return get<2>(a) < get<2>(b);
     });
     
-    // asignacion
-    vector<int> asignacion(filas, 0);
-    vector<double> valorClusters(numClusters, 0);
     for(const auto& t : todas_distancias){
         int punto_id = get<0>(t);
         int centro_id = get<1>(t);
         if(asignacion[punto_id] != 0) continue;
         if(limClusters[centro_id] > 0){
             asignacion[punto_id] = centro_id;
-            valorClusters[centro_id] += get<2>(todas_distancias[punto_id]);
             limClusters[centro_id]--;
         }
     }
     imprimirVector1D(asignacion);
-    imprimirVector1Ddouble(valorClusters);
 
-    // fitness global
-    double fitness_global =accumulate(valorClusters.begin(), valorClusters.end(), 0.0);
-    cout << "Fitness global: " << fitness_global << endl;
+    // funcion fitness begin
+	// coordenadas por cluster
+	auto coordenadasPorCluster = obtenerCoordenadasPorCluster(asignacion, datos, numClusters);
+
+	cout << "Puntos por cluster:" << endl;
+	for(int c = 0; c < coordenadasPorCluster.size(); c++){
+		cout << "Cluster [" << c << "]: " << endl;
+		int max = coordenadasPorCluster[c].size();
+		for(int i = 0; i < max; i++){
+			cout << "	(" << coordenadasPorCluster[c][i].first << ", " << coordenadasPorCluster[c][i].second << ")" << endl;
+		}
+	}    
+
+    // funcion fitness - aplica para todas las soluciones (metodos)
+	// fitness : cluster + global
+	auto valoresClusters = obtenerValoresClusters(coordenadasPorCluster, numClusters);
+	imprimirVector1Ddouble(valoresClusters);
+
+	double fitness_global = accumulate(valoresClusters.begin(), valoresClusters.end(), 0.0);
+	cout << "Fitness: " << fitness_global << endl;
+    // funcion fitness end
+// class solution end
 }

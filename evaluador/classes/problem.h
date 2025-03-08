@@ -1,0 +1,42 @@
+#ifndef problem_h
+#define problem_h
+#include <string>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+using namespace std;
+
+class Problem{
+private:
+    // rutas archivos
+    string Dataset;
+    string Clusters;
+    // almacenamiento datos
+    int numClusters;
+    vector<int> limClusters;
+    vector<vector<int>> dataset;
+    int points;
+    int variables;
+    // metodos auxiliares
+    void loadClusters();
+    void loadDataset();
+
+public:
+    // constructor y destructor
+    Problem(const string& fileDataset, const string& fileClusters);
+    ~Problem();
+    // metodos almacenamiento
+    int getNumClusters() const;
+    const vector<int>& getLimClusters() const;
+    const vector<vector<int>>& getDataset() const;
+    int getPoints() const;
+    int getVariables() const;
+    // metodos impresion
+    void printVector1D(const vector<int>& vector) const;
+    void printVector2D(const vector<vector<int>>& vector) const;
+    // metodo carga dataset
+    void loadData();
+};
+
+#endif
