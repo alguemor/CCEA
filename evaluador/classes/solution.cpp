@@ -1,4 +1,5 @@
 #include "solution.h"
+#include "util.h"
 #include <iostream>
 #include <limits>
 #include <algorithm>
@@ -15,34 +16,6 @@ Solution::Solution(Problem& prob) : problem(prob), fitness(0.0){
 }
 
 Solution::~Solution(){
-}
-
-void Solution::initializeRandomCenters(){
-    const auto& dataset = problem.getDataset();
-    int numClusters = problem.getNumClusters();
-    int minValue = numeric_limits<int>::max();
-    int maxValue = numeric_limits<int>::min();
-    for(const auto& point : dataset){
-        if(!point.empty()){
-            auto min_it = min_element(point.begin(), point.end());
-            auto max_it = max_element(point.begin(), point.end());
-            if(min_it != point.end()) minValue = min(minValue, *min_it);
-            if(max_it != point.end()) maxValue = max(maxValue, *max_it);
-        }
-    }
-
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<int> range(minValue, maxValue);
-
-    clusterCenters.clear();
-    for(int i = 0; i < numClusters; i++){
-        int x = range(gen);
-        int y = range(gen);
-        clusterCenters.push_back(make_pair(x, y));
-    }
-
-    printClusterCenters();
 }
 
 void Solution::calculateDistances(){
@@ -94,8 +67,6 @@ void Solution::greedy(){
             clusterLimits[center_id]--;
         }
     }
-
-    printAssignment();
 }
 
 vector<vector<pair<int, int>>> Solution::getClusterCoordinates(){
@@ -143,7 +114,9 @@ double Solution::calculateFitness(const vector<double>& values){
 }
 
 void Solution::solveGreedy(){
-    initializeRandomCenters();
+    Util util(problem, *this); // crea instancia de Util
+    clusterCenters = util.generateRandomCenters(problem.getNumClusters());
+
     calculateDistances();
     sortDistances();
     greedy();
@@ -152,13 +125,19 @@ void Solution::solveGreedy(){
     clusterValues = getClusterValues(clusterCoordinates);
     fitness = calculateFitness(clusterValues);
 
-    printClusterCoordinates();
-    printClusterValues();
-    printFitness();
+    util.printClusterCenters();
+    util.printAssignment();
+    util.printClusterCoordinates();
+    util.printClusterValues();
+    util.printFitness();
 }
 
 const vector<pair<int, int>>& Solution::getClusterCenters() const{
     return clusterCenters;
+}
+
+const vector<vector<pair<int, int>>>& Solution::getClusterCoordinates() const{
+    return clusterCoordinates;
 }
 
 const vector<int>& Solution::getAssignment() const{
@@ -171,59 +150,4 @@ const vector<double>& Solution::getClusterValues() const{
 
 double Solution::getFitness() const{
     return fitness;
-}
-
-void Solution::printClusterCenters() const {
-    cout << "Centros de clusters:" << endl;
-    for (int i = 0; i < clusterCenters.size(); i++) {
-        cout << "  Cluster " << i << ": (" 
-             << clusterCenters[i].first << ", " 
-             << clusterCenters[i].second << ")" << endl;
-    }
-}
-
-void Solution::printAssignment() const {
-    cout << "Asignación de puntos a clusters:" << endl;
-    
-    // Contar puntos por cluster
-    vector<int> count(problem.getNumClusters(), 0);
-    for (int c : assignment) {
-        if (c >= 0 && c < problem.getNumClusters()) {
-            count[c]++;
-        }
-    }
-    
-    for (int i = 0; i < count.size(); i++) {
-        cout << "  Cluster " << i << ": " << count[i] << " puntos" << endl;
-    }
-}
-
-void Solution::printClusterCoordinates() const {
-    cout << "Puntos por cluster:" << endl;
-    for (int c = 0; c < clusterCoordinates.size(); c++) {
-        cout << "  Cluster " << c << " (" << clusterCoordinates[c].size() << " puntos):" << endl;
-        
-        // Limitar la salida si hay muchos puntos
-        const int max_points_to_show = 5;
-        for (int i = 0; i < min(max_points_to_show, (int)clusterCoordinates[c].size()); i++) {
-            cout << "    (" << clusterCoordinates[c][i].first << ", " 
-                 << clusterCoordinates[c][i].second << ")" << endl;
-        }
-        
-        if (clusterCoordinates[c].size() > max_points_to_show) {
-            cout << "    ... y " << (clusterCoordinates[c].size() - max_points_to_show) 
-                 << " puntos más" << endl;
-        }
-    }
-}
-
-void Solution::printClusterValues() const {
-    cout << "Valores de fitness por cluster:" << endl;
-    for (int i = 0; i < clusterValues.size(); i++) {
-        cout << "  Cluster " << i << ": " << clusterValues[i] << endl;
-    }
-}
-
-void Solution::printFitness() const {
-    cout << "Fitness global: " << fitness << endl;
 }

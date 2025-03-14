@@ -12,22 +12,22 @@ using namespace std;
 class Solution{
 private:
     Problem& problem;
-    vector<pair<int, int>> clusterCenters;
     vector<vector<double>> distances;
-    vector<int> assignment;
     vector<tuple<int, int, double>> allDistances;
     vector<int> clusterLimits;
-    vector<vector<pair<int, int>>> clusterCoordinates;
-    vector<double> clusterValues;
-    double fitness;
-
-    void initializeRandomCenters();
+    
     void calculateDistances();
     void sortDistances();
 
 public:
     Solution(Problem& prob);
     ~Solution();
+
+    vector<pair<int, int>> clusterCenters;
+    vector<int> assignment;
+    vector<vector<pair<int, int>>> clusterCoordinates;
+    vector<double> clusterValues;
+    double fitness;
 
     void greedy();
     vector<vector<pair<int, int>>> getClusterCoordinates();
@@ -37,15 +37,10 @@ public:
     void solveGreedy();
 
     const vector<pair<int, int>>& getClusterCenters() const;
+    const vector<vector<pair<int, int>>>& getClusterCoordinates() const;
     const vector<int>& getAssignment() const;
     const vector<double>& getClusterValues() const;
     double getFitness() const;
-
-    void printClusterCenters() const;
-    void printAssignment() const;
-    void printClusterCoordinates() const;
-    void printClusterValues() const;
-    void printFitness() const;
 };
 
 #endif
