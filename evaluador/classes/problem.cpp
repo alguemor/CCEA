@@ -1,6 +1,5 @@
 #include "problem.h"
 #include <iostream>
-#define pb push_back
 using namespace std;
 
 // constructor : inicializa rutas archivos
@@ -18,7 +17,7 @@ void Problem::loadClusters(){
     for(int i = 0; i < numClusters; i++){
         int lim;
         fileClusters >> lim;
-        limClusters.pb(lim);
+        limClusters.push_back(lim);
     }
     fileClusters.close();
     printVector1D(limClusters);
@@ -63,6 +62,62 @@ int Problem::getPoints() const{
 int Problem::getVariables() const{
     return variables;
 }
+// fitness
+vector<vector<pair<int, int>>> Problem::calculateClusterCoordinates(const vector<int>& assignment) const{
+    int numClusters = getNumClusters();
+    vector<vector<pair<int, int>>> coordinates(numClusters);
+    if(assignment.size() != points){
+        return coordinates;
+    }
+    for(int i = 0; i < assignment.size(); i++){
+        int cluster = assignment[i];
+        if(cluster >= 0 && cluster < numClusters){
+            int x = dataset[i][0];
+            int y = dataset[i][1];
+            coordinates[cluster].push_back(make_pair(x, y));
+        }
+    }
+    return coordinates;
+}
+
+vector<double> Problem::calculateClusterValues(const vector<vector<pair<int, int>>>& coordinates) const{
+    int numClusters = getNumClusters();
+    vector<double> values(numClusters, 0.0);
+    for(int c = 0; c < numClusters; c++){
+        if(coordinates[c].empty()) continue;
+        double sumDistances = 0.0;
+        for(int i = 0; i < coordinates[c].size(); i++){
+            for(int j = i + 1; j < coordinates[c].size(); j++){
+                int x1 = coordinates[c][i].first;
+                int y1 = coordinates[c][i].second;
+                int x2 = coordinates[c][j].first;
+                int y2 = coordinates[c][j].second;
+                int dx = x2 - x1;
+                int dy = y2 - y1;
+                double distance = sqrt(dx*dx + dy*dy);
+                sumDistances += distance;
+            }
+        }
+        if(coordinates[c].size() > 0){ // evitar division por cero
+            values[c] = sumDistances / coordinates[c].size();
+        }else{
+            values[c] = 0.0;
+        }
+    }
+    return values;
+}
+
+double Problem::calculateFitness(const vector<double>& clusterValues) const {
+    return accumulate(clusterValues.begin(), clusterValues.end(), 0.0);
+}
+
+double Problem::evaluateSolution(const vector<int>& assignment,
+                                vector<vector<pair<int, int>>>& coordinates,
+                                vector<double>& clusterValues) const{
+    coordinates = calculateClusterCoordinates(assignment);
+    clusterValues = calculateClusterValues(coordinates);
+    return calculateFitness(clusterValues);
+                                }
 
 void Problem::printVector1D(const vector<int>& vector) const{
     cout << "[";

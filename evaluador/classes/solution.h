@@ -5,7 +5,6 @@
 #include <tuple>
 #include <utility>
 #include <random>
-#include <cmath>
 #include <numeric>
 using namespace std;
 
@@ -27,17 +26,17 @@ public:
 
     vector<pair<int, int>> clusterCenters;
     vector<int> assignment;
+    // cache en Solution, logica en Problem
     vector<vector<pair<int, int>>> clusterCoordinates;
     vector<double> clusterValues;
     double fitness;
 
     void greedy();
     const vector<vector<pair<int, int>>>& getClusterCoordinates(); // flag
-    vector<double> getClusterValues(const vector<vector<pair<int, int>>>& coordinates);
-    double calculateFitness(const vector<double>& clusters);
-
+    // metodo actualizar valores evaluacion
+    void updateEvaluation();
     void solveGreedy();
-
+    // getters
     const vector<pair<int, int>>& getClusterCenters() const;
     const vector<vector<pair<int, int>>>& getClusterCoordinates() const;
     const vector<int>& getAssignment() const;

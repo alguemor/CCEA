@@ -72,48 +72,13 @@ void Solution::greedy(){
 }
 
 void Solution::calculateClusterCoordinates(){
-    const auto& dataset = problem.getDataset();
-    int numClusters = problem.getNumClusters();
-    clusterCoordinates.clear();
-    clusterCoordinates.resize(numClusters);
-
-    for(int i = 0; i < assignment.size(); i++){
-        int cluster = assignment[i];
-        if(cluster >= 0 && cluster < numClusters){
-            int x = dataset[i][0];
-            int y = dataset[i][1];
-            clusterCoordinates[cluster].push_back(make_pair(x, y));
-        }
-    }
-
+    clusterCoordinates = problem.calculateClusterCoordinates(assignment);
     clusterCoordinatesUpdated = true;
 }
 
-vector<double> Solution::getClusterValues(const vector<vector<pair<int, int>>>& coordinates){
-    int numClusters = problem.getNumClusters();
-    vector<double> values(numClusters, 0.0);
-    
-    for(int c = 0; c < numClusters; c++){
-        double sumDistances = 0.0;
-        for(int i = 0; i < coordinates[c].size(); i++){
-            for(int j = i + 1; j < coordinates[c].size(); j++){
-                int x1 = coordinates[c][i].first;
-                int y1 = coordinates[c][i].second;
-                int x2 = coordinates[c][j].first;
-                int y2 = coordinates[c][j].second;
-                int dx = x2 - x1;
-                int dy = y2 - y1;
-                double distance = sqrt(dx*dx + dy*dy);
-                sumDistances += distance;
-            }
-        }
-        values[c] = sumDistances / coordinates[c].size();
-    }
-    return values;
-}
-
-double Solution::calculateFitness(const vector<double>& values){
-    return accumulate(values.begin(), values.end(), 0.0);
+void Solution::updateEvaluation(){
+    fitness = problem.evaluateSolution(assignment, clusterCoordinates, clusterValues);
+    clusterCoordinatesUpdated = true;
 }
 
 void Solution::solveGreedy(){
@@ -123,10 +88,8 @@ void Solution::solveGreedy(){
     calculateDistances();
     sortDistances();
     greedy();
-
-    const auto& coordinates = getClusterCoordinates();
-    clusterValues = getClusterValues(coordinates);
-    fitness = calculateFitness(clusterValues);
+    // actualiza evaluacion con Problem
+    updateEvaluation();
 
     util.printClusterCenters();
     util.printAssignment();
@@ -141,7 +104,8 @@ const vector<pair<int, int>>& Solution::getClusterCenters() const{
 
 const vector<vector<pair<int, int>>>& Solution::getClusterCoordinates(){
     if(!clusterCoordinatesUpdated){
-        calculateClusterCoordinates();
+        clusterCoordinates = problem.calculateClusterCoordinates(assignment);
+        clusterCoordinatesUpdated = true;
     }
     return clusterCoordinates;
 }
