@@ -1,5 +1,5 @@
-#ifndef solution_h
-#define solution_h
+#ifndef solutionGreedy_h
+#define solutionGreedy_h
 #include "problem.h"
 #include <vector>
 #include <tuple>

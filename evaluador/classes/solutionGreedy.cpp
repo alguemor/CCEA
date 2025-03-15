@@ -1,4 +1,4 @@
-#include "solution.h"
+#include "solutionGreedy.h"
 #include "util.h"
 #include <iostream>
 #include <limits>
