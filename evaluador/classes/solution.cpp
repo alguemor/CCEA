@@ -5,7 +5,7 @@
 #include <algorithm>
 using namespace std;
 
-Solution::Solution(Problem& prob) : problem(prob), fitness(0.0){
+Solution::Solution(Problem& prob) : problem(prob), fitness(0.0), clusterCoordinatesUpdated(false){
     int numClusters = problem.getNumClusters();
     int numPoints = problem.getPoints();
     distances.resize(numPoints, vector<double>(numClusters, 0.0));
@@ -67,23 +67,26 @@ void Solution::greedy(){
             clusterLimits[center_id]--;
         }
     }
+
+    clusterCoordinatesUpdated = false;
 }
 
-vector<vector<pair<int, int>>> Solution::getClusterCoordinates(){
+void Solution::calculateClusterCoordinates(){
     const auto& dataset = problem.getDataset();
     int numClusters = problem.getNumClusters();
-    vector<vector<pair<int, int>>> coordinates(numClusters);
-    
-    for(int i = 0; i< assignment.size(); i++){
+    clusterCoordinates.clear();
+    clusterCoordinates.resize(numClusters);
+
+    for(int i = 0; i < assignment.size(); i++){
         int cluster = assignment[i];
         if(cluster >= 0 && cluster < numClusters){
             int x = dataset[i][0];
             int y = dataset[i][1];
-            coordinates[cluster].push_back(make_pair(x, y));
+            clusterCoordinates[cluster].push_back(make_pair(x, y));
         }
     }
-    
-    return coordinates;
+
+    clusterCoordinatesUpdated = true;
 }
 
 vector<double> Solution::getClusterValues(const vector<vector<pair<int, int>>>& coordinates){
@@ -121,8 +124,8 @@ void Solution::solveGreedy(){
     sortDistances();
     greedy();
 
-    clusterCoordinates = getClusterCoordinates();
-    clusterValues = getClusterValues(clusterCoordinates);
+    const auto& coordinates = getClusterCoordinates();
+    clusterValues = getClusterValues(coordinates);
     fitness = calculateFitness(clusterValues);
 
     util.printClusterCenters();
@@ -136,8 +139,15 @@ const vector<pair<int, int>>& Solution::getClusterCenters() const{
     return clusterCenters;
 }
 
-const vector<vector<pair<int, int>>>& Solution::getClusterCoordinates() const{
+const vector<vector<pair<int, int>>>& Solution::getClusterCoordinates(){
+    if(!clusterCoordinatesUpdated){
+        calculateClusterCoordinates();
+    }
     return clusterCoordinates;
+}
+
+const vector<vector<pair<int, int>>>& Solution::getClusterCoordinates() const{
+    return clusterCoordinates; // asumimos coordenadas calculadas
 }
 
 const vector<int>& Solution::getAssignment() const{

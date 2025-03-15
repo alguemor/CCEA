@@ -15,9 +15,11 @@ private:
     vector<vector<double>> distances;
     vector<tuple<int, int, double>> allDistances;
     vector<int> clusterLimits;
-    
+    bool clusterCoordinatesUpdated; // flag coordenadas actualizadas
+
     void calculateDistances();
     void sortDistances();
+    void calculateClusterCoordinates();
 
 public:
     Solution(Problem& prob);
@@ -30,7 +32,7 @@ public:
     double fitness;
 
     void greedy();
-    vector<vector<pair<int, int>>> getClusterCoordinates();
+    const vector<vector<pair<int, int>>>& getClusterCoordinates(); // flag
     vector<double> getClusterValues(const vector<vector<pair<int, int>>>& coordinates);
     double calculateFitness(const vector<double>& clusters);
 
