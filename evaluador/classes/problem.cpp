@@ -5,7 +5,7 @@ using namespace std;
 // constructor : inicializa rutas archivos
 Problem::Problem(const string& fileDataset, const string& fileClusters)
     : Dataset(fileDataset), Clusters(fileClusters),
-    numClusters(0), points(0), variables(0){
+    numClusters(0), points(0), variables(0), dataLoaded(false){
 }
 // destructor
 Problem::~Problem(){    
@@ -39,8 +39,12 @@ void Problem::loadDataset(){
 }
 
 void Problem::loadData(){
-    loadClusters();
-    loadDataset();
+    if(!dataLoaded){ // no acumulacion de datos
+        limClusters.clear();
+        loadClusters();
+        loadDataset();
+        dataLoaded = true;
+    }
 }
 
 int Problem::getNumClusters() const{

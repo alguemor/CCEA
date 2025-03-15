@@ -23,6 +23,7 @@ private:
     // metodos auxiliares
     void loadClusters();
     void loadDataset();
+    bool dataLoaded; // flag carga
 
 public:
     // constructor y destructor
