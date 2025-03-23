@@ -1,6 +1,7 @@
 #include "util.h"
-#include "solution.h"
+#include "solutionGreedy.h"
 #include <iostream>
+#include <iomanip>
 #include <limits>
 #include <algorithm>
 using namespace std;
@@ -38,9 +39,30 @@ vector<pair<int, int>> Util::generateRandomCenters(int numClusters) const{
     return clusterCenters;
 }
 
-void Util::printClusterCenters() const {
-    const auto& centers = solution.getClusterCenters();
-    cout << "Centros de clusters:" << endl;
+vector<pair<double, double>> Util::calculateRealClusterCoordinates(int numClusters) const{
+    const auto& coordinates = solution.getClusterCoordinates();
+    vector<pair<double, double>> clusterCenters(numClusters, {0.0, 0.0});
+    for(int c = 0; c < numClusters; c++){ // esto si ya que son todos los clusters
+        int dx = 0.0;
+        int dy = 0.0;
+        for(int i = 0; i < coordinates[c].size(); i++){
+            dx += coordinates[c][i].first;
+            dy += coordinates[c][i].second;
+        }
+        if(coordinates[c].size() > 0){ // evitar division por cero
+            clusterCenters[c].first = dx / coordinates[c].size();
+            clusterCenters[c].second = dy / coordinates[c].size();
+        }else{
+            clusterCenters[c].first = 0.0;
+            clusterCenters[c].second = 0.0;
+        }
+    }
+    return clusterCenters;
+}
+
+void Util::printBeforeClusterCenters() const {
+    const auto& centers = solution.getBeforeClusterCenters();
+    cout << "Centros de clusters (antes de asignacion):" << endl;
     for (int i = 0; i < centers.size(); i++) {
         cout << "  Cluster " << i << ": (" 
              << centers[i].first << ", " 
@@ -48,10 +70,20 @@ void Util::printClusterCenters() const {
     }
 }
 
+void Util::printAfterClusterCenters() const {
+    const auto& centers = solution.getAfterClusterCenters();
+    cout << "Centros de clusters (despues de asignacion):" << endl;
+    for (int i = 0; i < centers.size(); i++) {
+        cout << "  Cluster " << i << ": (" 
+             << fixed << setprecision(2) << centers[i].first << ", " 
+             << fixed << setprecision(2) << centers[i].second << ")" << endl;
+    }
+}
+
 void Util::printAssignment() const {
     const auto& assignment = solution.getAssignment();
     int numClusters = problem.getNumClusters();
-    cout << "Asignación de puntos a clusters:" << endl;
+    cout << "Asignacion de puntos a clusters:" << endl;
     // Contar puntos por cluster
     vector<int> count(numClusters, 0);
     for (int c : assignment) {
@@ -77,7 +109,7 @@ void Util::printClusterCoordinates() const {
         }
         if (coordinates[c].size() > max_points_to_show) {
             cout << "    ... y " << (coordinates[c].size() - max_points_to_show) 
-                 << " puntos más" << endl;
+                 << " puntos mas" << endl;
         }
     }
 }

@@ -20,7 +20,7 @@ void Problem::loadClusters(){
         limClusters.push_back(lim);
     }
     fileClusters.close();
-    printVector1D(limClusters);
+    //printVector1D(limClusters);
 }
 
 void Problem::loadDataset(){
@@ -35,7 +35,7 @@ void Problem::loadDataset(){
         }
     }
     fileDataset.close();
-    printVector2D(dataset);
+    //printVector2D(dataset);
 }
 
 void Problem::loadData(){
@@ -67,7 +67,7 @@ int Problem::getVariables() const{
     return variables;
 }
 // fitness
-vector<vector<pair<int, int>>> Problem::calculateClusterCoordinates(const vector<int>& assignment) const{
+vector<vector<pair<int, int>>> Problem::calculatePointsCoordinatesPerCluster(const vector<int>& assignment) const{
     int numClusters = getNumClusters();
     vector<vector<pair<int, int>>> coordinates(numClusters);
     if(assignment.size() != points){
@@ -118,7 +118,7 @@ double Problem::calculateFitness(const vector<double>& clusterValues) const {
 double Problem::evaluateSolution(const vector<int>& assignment,
                                 vector<vector<pair<int, int>>>& coordinates,
                                 vector<double>& clusterValues) const{
-    coordinates = calculateClusterCoordinates(assignment);
+    coordinates = calculatePointsCoordinatesPerCluster(assignment);
     clusterValues = calculateClusterValues(coordinates);
     return calculateFitness(clusterValues);
                                 }

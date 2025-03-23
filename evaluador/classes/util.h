@@ -19,8 +19,10 @@ private:
     ~Util();
     // numeros / centros aleatorios
     vector<pair<int, int>> generateRandomCenters(int numClusters) const;
+    vector<pair<double, double>> calculateRealClusterCoordinates(int numClusters) const;
     // impresiones
-    void printClusterCenters() const;
+    void printBeforeClusterCenters() const;
+    void printAfterClusterCenters() const; // despues de la asignacion - distancia
     void printAssignment() const;
     void printClusterCoordinates() const;
     void printClusterValues() const;

@@ -24,7 +24,9 @@ public:
     Solution(Problem& prob);
     ~Solution();
 
-    vector<pair<int, int>> clusterCenters;
+    vector<pair<int, int>> beforeClusterCenters;
+    // centros despues de asignacion
+    vector<pair<double, double>> afterClusterCenters;
     vector<int> assignment;
     // cache en Solution, logica en Problem
     vector<vector<pair<int, int>>> clusterCoordinates;
@@ -37,11 +39,13 @@ public:
     void updateEvaluation();
     void solveGreedy();
     // getters
-    const vector<pair<int, int>>& getClusterCenters() const;
+    const vector<pair<int, int>>& getBeforeClusterCenters() const;
     const vector<vector<pair<int, int>>>& getClusterCoordinates() const;
     const vector<int>& getAssignment() const;
     const vector<double>& getClusterValues() const;
     double getFitness() const;
+
+    const vector<pair<double, double>>& getAfterClusterCenters() const;
 };
 
 #endif

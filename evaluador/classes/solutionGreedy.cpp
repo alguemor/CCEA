@@ -25,8 +25,8 @@ void Solution::calculateDistances(){
 
     for(int i = 0; i < numPoints; i++){
         for(int j = 0; j < numClusters; j++){
-            int dx = dataset[i][0] - clusterCenters[j].first;
-            int dy = dataset[i][1] - clusterCenters[j].second;
+            int dx = dataset[i][0] - beforeClusterCenters[j].first;
+            int dy = dataset[i][1] - beforeClusterCenters[j].second;
             distances[i][j] = sqrt(dx*dx + dy*dy);
         }
     }
@@ -72,7 +72,7 @@ void Solution::greedy(){
 }
 
 void Solution::calculateClusterCoordinates(){
-    clusterCoordinates = problem.calculateClusterCoordinates(assignment);
+    clusterCoordinates = problem.calculatePointsCoordinatesPerCluster(assignment);
     clusterCoordinatesUpdated = true;
 }
 
@@ -83,7 +83,7 @@ void Solution::updateEvaluation(){
 
 void Solution::solveGreedy(){
     Util util(problem, *this); // crea instancia de Util
-    clusterCenters = util.generateRandomCenters(problem.getNumClusters());
+    beforeClusterCenters = util.generateRandomCenters(problem.getNumClusters());
 
     calculateDistances();
     sortDistances();
@@ -91,20 +91,27 @@ void Solution::solveGreedy(){
     // actualiza evaluacion con Problem
     updateEvaluation();
 
-    util.printClusterCenters();
+    afterClusterCenters = util.calculateRealClusterCoordinates(problem.getNumClusters());
+
+    util.printBeforeClusterCenters();
+    util.printAfterClusterCenters(); // despues de asignacion
     util.printAssignment();
-    util.printClusterCoordinates();
+    //util.printClusterCoordinates();
     util.printClusterValues();
     util.printFitness();
 }
 
-const vector<pair<int, int>>& Solution::getClusterCenters() const{
-    return clusterCenters;
+const vector<pair<int, int>>& Solution::getBeforeClusterCenters() const{
+    return beforeClusterCenters;
+}
+
+const vector<pair<double, double>>& Solution::getAfterClusterCenters() const{
+    return afterClusterCenters;
 }
 
 const vector<vector<pair<int, int>>>& Solution::getClusterCoordinates(){
     if(!clusterCoordinatesUpdated){
-        clusterCoordinates = problem.calculateClusterCoordinates(assignment);
+        clusterCoordinates = problem.calculatePointsCoordinatesPerCluster(assignment);
         clusterCoordinatesUpdated = true;
     }
     return clusterCoordinates;
