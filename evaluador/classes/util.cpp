@@ -14,7 +14,7 @@ Util::~Util(){
 
 }
 
-vector<pair<int, int>> Util::generateRandomCenters(int numClusters) const{
+vector<pair<double, double>> Util::generateRandomCenters(int numClusters) const{
     const auto& dataset = problem.getDataset();
     int minValue = numeric_limits<int>::max();
     int maxValue = numeric_limits<int>::min();
@@ -29,7 +29,7 @@ vector<pair<int, int>> Util::generateRandomCenters(int numClusters) const{
 
     uniform_int_distribution<int> range(minValue, maxValue);
 
-    vector<pair<int, int>> clusterCenters;
+    vector<pair<double, double>> clusterCenters;
     for(int i = 0; i < numClusters; i++){
         int x = range(generator);
         int y = range(generator);
@@ -58,6 +58,43 @@ vector<pair<double, double>> Util::calculateRealClusterCoordinates(int numCluste
         }
     }
     return clusterCenters;
+}
+
+double Util::distance(const vector<pair<double, double>>& A, const vector<pair<double, double>>& B) const{
+    if(A.size() != B.size()) return -1.0;
+    // valores maximo y minimo
+    const auto& dataset = problem.getDataset();
+    int minValue = numeric_limits<int>::max();
+    int maxValue = numeric_limits<int>::min();
+    for(const auto& point : dataset){
+        if(!point.empty()){
+            auto min_it = min_element(point.begin(), point.end());
+            auto max_it = max_element(point.begin(), point.end());
+            if(min_it != point.end()) minValue = min(minValue, *min_it);
+            if(max_it != point.end()) maxValue = max(maxValue, *max_it);
+        }
+    }
+    double range = maxValue - minValue;
+    // esta forma de tener los minimos y maximos se tiene que cambiar ya que es sobre ambas dimensiones
+    // las dimensiones pueden tener diferentes minimos y maximos
+    double distance = 0.0;
+    int D = A.size();
+
+    for(int i = 0; i < D; i++){
+        double a_first = A[i].first;
+        double b_first = B[i].first;
+
+        double dif_first = (a_first - b_first) / range;
+        distance += dif_first * dif_first;
+
+        double a_second = A[i].second;
+        double b_second = B[i].second;
+
+        double dif_second = (a_second - b_second) / range;
+        distance += dif_second * dif_second;
+    }
+
+    return sqrt(distance) / sqrt(D);
 }
 
 void Util::printBeforeClusterCenters() const {
@@ -125,4 +162,9 @@ void Util::printClusterValues() const {
 void Util::printFitness() const {
     const auto& fitness = solution.getFitness();
     cout << "Fitness global: " << fitness << endl;
+}
+
+void Util::printDistance() const{
+    const auto& distance = solution.getDistance();
+    cout << "Distancia entre centros: " << distance << endl;
 }

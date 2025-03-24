@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include <random>
+#include <cmath>
 using namespace std;
 
 class Solution; // forward declaration - evita inclsuiones circulares
@@ -18,8 +19,11 @@ private:
     Util(const Problem& prob, const Solution&sol);
     ~Util();
     // numeros / centros aleatorios
-    vector<pair<int, int>> generateRandomCenters(int numClusters) const;
+    vector<pair<double, double>> generateRandomCenters(int numClusters) const;
     vector<pair<double, double>> calculateRealClusterCoordinates(int numClusters) const;
+    // distancia entre centros
+    double distance(const vector<pair<double, double>>& A, const vector<pair<double, double>>& B) const;
+    void printDistance() const;
     // impresiones
     void printBeforeClusterCenters() const;
     void printAfterClusterCenters() const; // despues de la asignacion - distancia

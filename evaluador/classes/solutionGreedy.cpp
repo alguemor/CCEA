@@ -93,15 +93,19 @@ void Solution::solveGreedy(){
 
     afterClusterCenters = util.calculateRealClusterCoordinates(problem.getNumClusters());
 
+    distance = util.distance(beforeClusterCenters, afterClusterCenters);
+
     util.printBeforeClusterCenters();
     util.printAfterClusterCenters(); // despues de asignacion
     util.printAssignment();
     //util.printClusterCoordinates();
     util.printClusterValues();
     util.printFitness();
+
+    util.printDistance();
 }
 
-const vector<pair<int, int>>& Solution::getBeforeClusterCenters() const{
+const vector<pair<double, double>>& Solution::getBeforeClusterCenters() const{
     return beforeClusterCenters;
 }
 
@@ -131,4 +135,8 @@ const vector<double>& Solution::getClusterValues() const{
 
 double Solution::getFitness() const{
     return fitness;
+}
+
+double Solution::getDistance() const{
+    return distance;
 }
