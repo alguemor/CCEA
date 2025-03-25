@@ -64,33 +64,38 @@ double Util::distance(const vector<pair<double, double>>& A, const vector<pair<d
     if(A.size() != B.size()) return -1.0;
     // valores maximo y minimo
     const auto& dataset = problem.getDataset();
-    int minValue = numeric_limits<int>::max();
-    int maxValue = numeric_limits<int>::min();
+    const auto& var = problem.getVariables(); 
+    vector<pair<int, int>> minMaxValues(var, {numeric_limits<int>::max(), numeric_limits<int>::min()});
     for(const auto& point : dataset){
         if(!point.empty()){
-            auto min_it = min_element(point.begin(), point.end());
-            auto max_it = max_element(point.begin(), point.end());
-            if(min_it != point.end()) minValue = min(minValue, *min_it);
-            if(max_it != point.end()) maxValue = max(maxValue, *max_it);
+            if(point.size() == var){
+                for(size_t i = 0; i < var; i++){
+                    minMaxValues[i].first = min(minMaxValues[i].first, point[i]);
+                    minMaxValues[i].second = max(minMaxValues[i].second, point[i]);
+                }
+            }
         }
     }
-    double range = maxValue - minValue;
-    // esta forma de tener los minimos y maximos se tiene que cambiar ya que es sobre ambas dimensiones
-    // las dimensiones pueden tener diferentes minimos y maximos
+    vector<double> ranges(var);
+    for(size_t i = 0; i < var; i++){
+        ranges[i] = minMaxValues[i].second - minMaxValues[i].first;
+    }
     double distance = 0.0;
     int D = A.size();
 
-    for(int i = 0; i < D; i++){
+    for(size_t i = 0; i < D; i++){
+        
+
         double a_first = A[i].first;
         double b_first = B[i].first;
 
-        double dif_first = (a_first - b_first) / range;
+        double dif_first = (a_first - b_first) / ranges[0];
         distance += dif_first * dif_first;
 
         double a_second = A[i].second;
         double b_second = B[i].second;
 
-        double dif_second = (a_second - b_second) / range;
+        double dif_second = (a_second - b_second) / ranges[1];
         distance += dif_second * dif_second;
     }
 
