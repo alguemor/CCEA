@@ -11,3 +11,8 @@ Cardinality Constrained Evolutionary Algorithm for clustering purposes.
 | ====== | ==== | ========== | ============== | ============ |
 | 01 | ruspini | 75 | 2 | 2 |
 | 04 | iris | 150 | 4 | 3 |
+
+## Methods used
+
+* Greedy approach (usable)
+* Min Cost Max Flow (soon)
